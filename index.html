@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<title>دفتر کار من</title>
+<link rel="manifest" href="manifest.json">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#17202a;font-family:Tahoma,Arial,sans-serif;padding-bottom:82px}
+header{position:sticky;top:0;z-index:5;background:#111827;color:#fff;padding:14px 16px;padding-top:calc(14px + env(safe-area-inset-top));box-shadow:0 2px 12px #0002}
+h1{font-size:20px;margin:0}.sub{font-size:11px;opacity:.75;margin-top:3px}
+main{max-width:850px;margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:13px;margin:10px 0;box-shadow:0 3px 15px #0000000b}
+.bottom{position:fixed;bottom:0;left:0;right:0;z-index:10;background:#fff;border-top:1px solid #ddd;padding:7px max(8px,env(safe-area-inset-left)) calc(7px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:5px}
+.bottom button{flex:1;max-width:170px;border:0;background:transparent;padding:8px 3px;border-radius:11px;color:#667085}.bottom button.active{background:#eef2ff;color:#1d4ed8;font-weight:bold}
+.icon{font-size:19px;display:block}.label{font-size:10px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+label{display:block;font-size:12px;color:#667085;margin:0 0 4px}input,select,textarea{width:100%;padding:10px;border:1px solid #d7dce2;border-radius:10px;background:#fff;font:inherit}textarea{min-height:75px}
+button{border:0;border-radius:10px;padding:10px 13px;font:inherit;cursor:pointer;background:#2563eb;color:white}button.secondary{background:#eef0f3;color:#263238}button.danger{background:#fee2e2;color:#b91c1c}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.stat{background:#f8fafc;border-radius:12px;padding:11px}.stat span{font-size:11px;color:#667085}.stat b{display:block;font-size:17px;margin:4px 0}.stat small{color:#667085}
+.calhead{display:flex;justify-content:space-between;align-items:center;gap:8px}.calhead strong{font-size:15px}.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}.dow{text-align:center;color:#7b8490;font-size:10px;padding:3px}
+.day{min-height:68px;border:1px solid #e5e7eb;border-radius:9px;padding:5px;background:#fff}.day:active{transform:scale(.98)}.day.today{border:2px solid #2563eb}.day.has{background:#eff6ff}.day .num{font-weight:bold;font-size:12px}.mini{font-size:9px;line-height:1.55;margin-top:4px;color:#344054;overflow:hidden}.dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:#2563eb;margin-left:3px}
+table{width:100%;border-collapse:collapse;font-size:11px}th,td{border-bottom:1px solid #eee;padding:8px;text-align:right;vertical-align:top}td .tiny{font-size:10px;color:#667085}.scroll{overflow:auto}
+.item{border:1px solid #e5e7eb;border-radius:12px;padding:10px;margin:7px 0}.itemhead{display:flex;justify-content:space-between;gap:8px}.badge{font-size:10px;background:#eef2ff;color:#3730a3;padding:4px 7px;border-radius:99px}.muted{color:#667085;font-size:11px}.money{font-weight:bold}.balance{font-size:20px;font-weight:bold}.positive{color:#15803d}.negative{color:#b91c1c}
+.hidden{display:none!important}.empty{text-align:center;color:#777;padding:25px 10px}.sectiontitle{font-weight:bold;margin-bottom:9px}.search{margin-bottom:8px}
+</style></head>
+<body>
+<header><h1>دفتر کار من</h1><div class="sub">ثبت کارکرد، درآمد و دریافتی‌ها</div></header>
+<main>
+<section id="home">
+<div class="card"><div class="sectiontitle">خلاصه امروز</div><div class="stats" id="todayStats"></div></div>
+<div class="card"><div class="sectiontitle">خلاصه این ماه</div><div class="stats" id="monthStats"></div></div>
+<div class="card"><div class="sectiontitle">مانده حساب</div><div class="balance" id="totalBalance"></div><div class="muted">درآمد ثبت‌شده منهای دریافتی‌های ثبت‌شده</div></div>
+<div class="card"><div class="actions"><button onclick="newEntry()">＋ ثبت روز کاری</button><button class="secondary" onclick="show('calendar')">تقویم</button></div></div>
+</section>
+
+<section id="calendar" class="hidden">
+<div class="card"><div class="calhead"><button class="secondary" onclick="moveMonth(-1)">‹</button><strong id="monthTitle"></strong><button class="secondary" onclick="moveMonth(1)">›</button></div><div class="calgrid" id="calendar"></div></div>
+<div class="card"><div class="sectiontitle">راهنما</div><div class="muted">روی هر روز بزن تا کارکرد همان روز را ببینی یا ثبت کنی.</div></div>
+</section>
+
+<section id="entries" class="hidden">
+<div class="card">
+<div class="sectiontitle" id="formTitle">ثبت روز کاری</div>
+<div class="grid">
+<div><label>تاریخ</label><input id="fdate" type="date"></div>
+<div><label>محل کار</label><input id="fplace" placeholder="مثلاً پروژه کابینت"></div>
+<div><label>ساعت کار</label><input id="fhours" type="number" min="0" step=".25" placeholder="8"></div>
+<div><label>درآمد کار</label><input id="fincome" type="number" min="0" step="1" placeholder="تومان"></div>
+<div><label>دریافتی / واریزی</label><input id="fpayment" type="number" min="0" step="1" placeholder="تومان"></div>
+<div><label>یادداشت</label><input id="fnote" placeholder="اختیاری"></div>
+</div>
+<div class="actions"><button onclick="saveEntry()">ذخیره</button><button class="secondary" onclick="resetForm()">پاک کردن</button></div>
+</div>
+<div class="card"><div class="sectiontitle">سوابق</div><input class="search" id="search" placeholder="جستجو در محل کار و یادداشت..." oninput="renderEntries()"><div id="entriesList"></div></div>
+</section>
+
+<section id="reports" class="hidden">
+<div class="card"><div class="sectiontitle">گزارش درآمد</div>
+<div class="grid3"><button onclick="report('day')">امروز</button><button onclick="report('week')">هفته</button><button onclick="report('month')">ماه</button></div>
+<div class="grid3" style="margin-top:8px"><button onclick="report('year')">سال</button><button class="secondary" onclick="exportData()">پشتیبان</button><button class="secondary" onclick="importData()">بازیابی</button></div>
+</div>
+<div class="card" id="reportBox"></div>
+</section>
+
+<section id="settings" class="hidden">
+<div class="card"><div class="sectiontitle">تنظیمات</div>
+<div><label>نام دفتر</label><input id="appName" placeholder="دفتر کار من"></div>
+<div class="actions"><button onclick="saveSettings()">ذخیره تنظیمات</button><button class="secondary" onclick="exportData()">خروجی پشتیبان</button><button class="secondary" onclick="importData()">ورود پشتیبان</button></div>
+</div>
+<div class="card"><div class="sectiontitle">مدیریت اطلاعات</div><button class="danger" onclick="wipe()">حذف همه اطلاعات</button><p class="muted">قبل از حذف، حتماً از اطلاعات پشتیبان بگیر.</p></div>
+</section>
+</main>
+
+<nav class="bottom">
+<button data-s="home" onclick="show('home')"><span class="icon">⌂</span><span class="label">خانه</span></button>
+<button data-s="calendar" onclick="show('calendar')"><span class="icon">▦</span><span class="label">تقویم</span></button>
+<button data-s="entries" onclick="show('entries')"><span class="icon">＋</span><span class="label">کارها</span></button>
+<button data-s="reports" onclick="show('reports')"><span class="icon">▤</span><span class="label">گزارش</span></button>
+<button data-s="settings" onclick="show('settings')"><span class="icon">⚙</span><span class="label">تنظیمات</span></button>
+</nav>
+
+<script>
+const K='workbook_v2',S='workbook_settings_v1';let db=JSON.parse(localStorage.getItem(K)||'[]'),settings=JSON.parse(localStorage.getItem(S)||'{}'),edit=null,view=new Date();
+const $=id=>document.getElementById(id), save=()=>localStorage.setItem(K,JSON.stringify(db));
+const today=()=>new Date().toISOString().slice(0,10), d=x=>new Date(x+'T12:00:00');
+const fa=n=>new Intl.NumberFormat('fa-IR').format(Math.round(n||0)), money=n=>fa(n)+' تومان';
+const sum=(a,k)=>a.reduce((v,x)=>v+(+x[k]||0),0);
+function fmt(s){return new Intl.DateTimeFormat('fa-IR',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d(s))}
+function monthName(dt){return new Intl.DateTimeFormat('fa-IR',{year:'numeric',month:'long'}).format(new Date(dt.getFullYear(),dt.getMonth(),15))}
+function show(id){document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.bottom button').forEach(x=>x.classList.toggle('active',x.dataset.s===id));if(id==='home')renderHome();if(id==='calendar')renderCalendar();if(id==='entries')renderEntries();if(id==='reports')report('month');if(id==='settings'){$('appName').value=settings.name||'دفتر کار من'}}
+function newEntry(date=today()){edit=null;$('formTitle').textContent='ثبت روز کاری';$('fdate').value=date;$('fplace').value='';$('fhours').value='';$('fincome').value='';$('fpayment').value='';$('fnote').value='';show('entries');window.scrollTo({top:0,behavior:'smooth'})}
+function resetForm(){newEntry($('fdate').value||today())}
+function saveEntry(){let e={id:edit||Date.now().toString(),date:$('fdate').value||today(),place:$('fplace').value.trim(),hours:+$('fhours').value||0,income:+$('fincome').value||0,payment:+$('fpayment').value||0,note:$('fnote').value.trim()};if(edit)db=db.map(x=>x.id===edit?e:x);else db.push(e);save();renderAll();alert('ثبت شد')}
+function editEntry(id){let x=db.find(e=>e.id===id);edit=id;$('formTitle').textContent='ویرایش روز کاری';$('fdate').value=x.date;$('fplace').value=x.place;$('fhours').value=x.hours;$('fincome').value=x.income;$('fpayment').value=x.payment;$('fnote').value=x.note;window.scrollTo({top:0,behavior:'smooth'})}
+function del(id){if(confirm('این رکورد حذف شود؟')){db=db.filter(x=>x.id!==id);save();renderAll()}}
+function renderEntries(){let q=($('search')?.value||'').toLowerCase(),a=[...db].sort((x,y)=>y.date.localeCompare(x.date));if(q)a=a.filter(x=>(x.place+' '+x.note).toLowerCase().includes(q));if(!a.length){$('entriesList').innerHTML='<div class="empty">هنوز چیزی ثبت نشده.</div>';return} $('entriesList').innerHTML=a.map(x=>`<div class="item"><div class="itemhead"><b>${fmt(x.date)}</b><span class="badge">${x.place||'بدون محل'}</span></div><div class="muted">${fa(x.hours)} ساعت · درآمد <span class="money">${money(x.income)}</span> · دریافتی ${money(x.payment)}</div>${x.note?`<div style="margin-top:5px">${x.note}</div>`:''}<div class="actions"><button onclick="editEntry('${x.id}')">ویرایش</button><button class="danger" onclick="del('${x.id}')">حذف</button></div></div>`).join('')}
+function renderCalendar(){let y=view.getFullYear(),m=view.getMonth();$('monthTitle').textContent=monthName(view);let out=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'].map(x=>`<div class="dow">${x}</div>`).join('');let first=(new Date(y,m,1).getDay()+1)%7,days=new Date(y,m+1,0).getDate();for(let i=0;i<first;i++)out+='<div></div>';for(let n=1;n<=days;n++){let s=new Date(y,m,n).toISOString().slice(0,10),a=db.filter(x=>x.date===s);out+=`<div class="day ${s===today()?'today ':''}${a.length?'has':''}" onclick="newEntry('${s}')"><div class="num">${fa(n)}</div>${a.length?`<div class="mini"><span class="dot"></span>${fa(sum(a,'hours'))} ساعت<br>${money(sum(a,'income'))}</div>`:''}</div>`}$('calendar').innerHTML=out}
+function moveMonth(n){view.setMonth(view.getMonth()+n);renderCalendar()}
+function period(type){let now=new Date(),start,end;if(type==='day'){start=new Date(now.getFullYear(),now.getMonth(),now.getDate());end=new Date(start);end.setDate(end.getDate()+1)}if(type==='week'){let z=new Date(now.getFullYear(),now.getMonth(),now.getDate());z.setDate(z.getDate()-((z.getDay()+6)%7));start=z;end=new Date(z);end.setDate(end.getDate()+7)}if(type==='month'){start=new Date(now.getFullYear(),now.getMonth(),1);end=new Date(now.getFullYear(),now.getMonth()+1,1)}if(type==='year'){start=new Date(now.getFullYear(),0,1);end=new Date(now.getFullYear()+1,0,1)}return db.filter(x=>{let q=d(x.date);return q>=start&&q<end})}
+function box(a){let i=sum(a,'income'),p=sum(a,'payment');return `<div class="stats"><div class="stat"><span>تعداد روزهای ثبت‌شده</span><b>${fa(new Set(a.map(x=>x.date)).size)}</b></div><div class="stat"><span>ساعت کار</span><b>${fa(sum(a,'hours'))}</b></div><div class="stat"><span>درآمد</span><b>${money(i)}</b></div><div class="stat"><span>دریافتی</span><b>${money(p)}</b></div></div><hr><div class="muted">مانده</div><div class="balance ${i-p>=0?'positive':'negative'}">${money(i-p)}</div>`}
+function report(type){let a=period(type);$('reportBox').innerHTML=`<div class="sectiontitle">گزارش ${type==='day'?'امروز':type==='week'?'این هفته':type==='month'?'این ماه':'امسال'}</div>${box(a)}`}
+function renderHome(){let a=period('day'),m=period('month'),all=db,i=sum(all,'income')-sum(all,'payment');$('todayStats').innerHTML=box(a);$('monthStats').innerHTML=box(m);$('totalBalance').textContent=money(i);$('totalBalance').className='balance '+(i>=0?'positive':'negative')}
+function exportData(){let payload={version:2,exportedAt:new Date().toISOString(),entries:db,settings};let blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='دفتر-کار-پشتیبان.json';a.click();URL.revokeObjectURL(u)}
+function importData(){let i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=()=>{let f=i.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x.entries))throw 0;db=x.entries;settings=x.settings||{};save();localStorage.setItem(S,JSON.stringify(settings));renderAll();alert('اطلاعات بازیابی شد')}catch(e){alert('فایل پشتیبان معتبر نیست')}};r.readAsText(f)};i.click()}
+function saveSettings(){settings.name=$('appName').value.trim()||'دفتر کار من';localStorage.setItem(S,JSON.stringify(settings));$('header');alert('ذخیره شد')}
+function wipe(){if(confirm('همه اطلاعات برای همیشه حذف شود؟')){localStorage.removeItem(K);db=[];renderAll()}}
+function renderAll(){renderHome();renderCalendar();renderEntries();if(!$('reports').classList.contains('hidden'))report('month')}
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');renderAll();show('home');
+</script></body></html>
