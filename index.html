@@ -6,25 +6,29 @@
 <title>دفتر کار من</title>
 <link rel="manifest" href="manifest.json">
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f3f4f6;color:#17202a;font-family:Tahoma,Arial,sans-serif;padding-bottom:82px}
-header{position:sticky;top:0;z-index:5;background:#111827;color:#fff;padding:14px 16px;padding-top:calc(14px + env(safe-area-inset-top));box-shadow:0 2px 12px #0002}
-h1{font-size:20px;margin:0}.sub{font-size:11px;opacity:.75;margin-top:3px}
-main{max-width:850px;margin:auto;padding:12px}.card{background:#fff;border-radius:16px;padding:13px;margin:10px 0;box-shadow:0 3px 15px #0000000b}
-.bottom{position:fixed;bottom:0;left:0;right:0;z-index:10;background:#fff;border-top:1px solid #ddd;padding:7px max(8px,env(safe-area-inset-left)) calc(7px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:5px}
-.bottom button{flex:1;max-width:170px;border:0;background:transparent;padding:8px 3px;border-radius:11px;color:#667085}.bottom button.active{background:#eef2ff;color:#1d4ed8;font-weight:bold}
-.icon{font-size:19px;display:block}.label{font-size:10px}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
-label{display:block;font-size:12px;color:#667085;margin:0 0 4px}input,select,textarea{width:100%;padding:10px;border:1px solid #d7dce2;border-radius:10px;background:#fff;font:inherit}textarea{min-height:75px}
-button{border:0;border-radius:10px;padding:10px 13px;font:inherit;cursor:pointer;background:#2563eb;color:white}button.secondary{background:#eef0f3;color:#263238}button.danger{background:#fee2e2;color:#b91c1c}
-.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.stat{background:#f8fafc;border-radius:12px;padding:11px}.stat span{font-size:11px;color:#667085}.stat b{display:block;font-size:17px;margin:4px 0}.stat small{color:#667085}
-.calhead{display:flex;justify-content:space-between;align-items:center;gap:8px}.calhead strong{font-size:15px}.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}.dow{text-align:center;color:#7b8490;font-size:10px;padding:3px}
-.day{min-height:68px;border:1px solid #e5e7eb;border-radius:9px;padding:5px;background:#fff}.day:active{transform:scale(.98)}.day.today{border:2px solid #2563eb}.day.has{background:#eff6ff}.day .num{font-weight:bold;font-size:12px}.mini{font-size:9px;line-height:1.55;margin-top:4px;color:#344054;overflow:hidden}.dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:#2563eb;margin-left:3px}
-table{width:100%;border-collapse:collapse;font-size:11px}th,td{border-bottom:1px solid #eee;padding:8px;text-align:right;vertical-align:top}td .tiny{font-size:10px;color:#667085}.scroll{overflow:auto}
-.item{border:1px solid #e5e7eb;border-radius:12px;padding:10px;margin:7px 0}.itemhead{display:flex;justify-content:space-between;gap:8px}.badge{font-size:10px;background:#eef2ff;color:#3730a3;padding:4px 7px;border-radius:99px}.muted{color:#667085;font-size:11px}.money{font-weight:bold}.balance{font-size:20px;font-weight:bold}.positive{color:#15803d}.negative{color:#b91c1c}
-.hidden{display:none!important}.empty{text-align:center;color:#777;padding:25px 10px}.sectiontitle{font-weight:bold;margin-bottom:9px}.search{margin-bottom:8px}
+*{box-sizing:border-box} :root{--bg:#f3f4f6;--card:#fff;--text:#17202a;--muted:#667085;--primary:#2563eb;--soft:#eef2ff;--border:#e5e7eb;--header:#111827}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Tahoma,Arial,sans-serif;padding-bottom:82px;transition:.2s}
+body.theme-dark{--bg:#0f172a;--card:#182235;--text:#f1f5f9;--muted:#aab5c5;--primary:#60a5fa;--soft:#233452;--border:#334155;--header:#020617}
+body.theme-blue{--bg:#eff6ff;--card:#fff;--text:#17202a;--muted:#64748b;--primary:#2563eb;--soft:#dbeafe;--border:#dbeafe;--header:#1e3a8a}
+body.theme-green{--bg:#f0fdf4;--card:#fff;--text:#17202a;--muted:#64748b;--primary:#16a34a;--soft:#dcfce7;--border:#bbf7d0;--header:#166534}
+header{position:sticky;top:0;z-index:5;background:var(--header);color:#fff;padding:14px 16px;padding-top:calc(14px + env(safe-area-inset-top));box-shadow:0 2px 12px #0002}
+h1{font-size:20px;margin:0}.sub{font-size:11px;opacity:.75;margin-top:3px}main{max-width:900px;margin:auto;padding:12px}.card{background:var(--card);border-radius:16px;padding:13px;margin:10px 0;box-shadow:0 3px 15px #0000000b;border:1px solid var(--border)}
+.bottom{position:fixed;bottom:0;left:0;right:0;z-index:10;background:var(--card);border-top:1px solid var(--border);padding:7px max(8px,env(safe-area-inset-left)) calc(7px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:5px}
+.bottom button{flex:1;max-width:170px;border:0;background:transparent;padding:8px 3px;border-radius:11px;color:var(--muted)}.bottom button.active{background:var(--soft);color:var(--primary);font-weight:bold}
+.icon{font-size:19px;display:block}.label{font-size:10px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+label{display:block;font-size:12px;color:var(--muted);margin:0 0 4px}input,select,textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font:inherit}textarea{min-height:75px}
+button{border:0;border-radius:10px;padding:10px 13px;font:inherit;cursor:pointer;background:var(--primary);color:white}button.secondary{background:var(--soft);color:var(--text)}button.danger{background:#fee2e2;color:#b91c1c}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.stat{background:var(--bg);border-radius:12px;padding:11px}.stat span{font-size:11px;color:var(--muted)}.stat b{display:block;font-size:17px;margin:4px 0}.stat small{color:var(--muted)}
+.calhead{display:flex;justify-content:space-between;align-items:center;gap:8px}.calhead strong{font-size:16px}.calgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-top:10px}.dow{text-align:center;color:var(--muted);font-size:11px;padding:6px 2px;font-weight:bold}
+.day{min-height:92px;border:1px solid var(--border);border-radius:11px;padding:6px;background:var(--card);cursor:pointer;overflow:hidden}.day:active{transform:scale(.98)}.day.today{border:2px solid var(--primary);padding:5px}.day.has{background:var(--soft)}.day .num{font-weight:bold;font-size:13px}.day .dayname{font-size:9px;color:var(--muted);margin-top:1px}.mini{font-size:9px;line-height:1.5;margin-top:5px;color:var(--text);overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}.mini .desc{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--primary);margin-left:3px}
+.calnav{display:flex;align-items:center;justify-content:center;gap:8px}.calnav button{width:42px;padding:8px}.todaybtn{font-size:11px;padding:7px 10px!important}.month-summary{font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:11px}th,td{border-bottom:1px solid var(--border);padding:8px;text-align:right;vertical-align:top}td .tiny{font-size:10px;color:var(--muted)}.scroll{overflow:auto}.item{border:1px solid var(--border);border-radius:12px;padding:10px;margin:7px 0}.itemhead{display:flex;justify-content:space-between;gap:8px}.badge{font-size:10px;background:var(--soft);color:var(--primary);padding:4px 7px;border-radius:99px}.muted{color:var(--muted);font-size:11px}.money{font-weight:bold}.balance{font-size:20px;font-weight:bold}.positive{color:#15803d}.negative{color:#b91c1c}.hidden{display:none!important}.empty{text-align:center;color:var(--muted);padding:25px 10px}.sectiontitle{font-weight:bold;margin-bottom:9px}.search{margin-bottom:8px}.theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.theme-btn{border:2px solid var(--border);background:var(--card);color:var(--text);padding:10px 5px;font-size:11px}.theme-btn.selected{border-color:var(--primary);box-shadow:0 0 0 2px var(--soft)}.theme-dot{width:24px;height:24px;border-radius:50%;margin:0 auto 5px;border:2px solid #fff;box-shadow:0 0 0 1px #ccc}.theme-light .theme-dot{background:#f3f4f6}.theme-dark .theme-dot{background:#0f172a}.theme-blue .theme-dot{background:#2563eb}.theme-green .theme-dot{background:#16a34a}
+@media(max-width:560px){.day{min-height:82px;padding:5px}.day.today{padding:4px}.calgrid{gap:3px}.dow{font-size:10px}.mini{font-size:8px}.theme-grid{grid-template-columns:repeat(2,1fr)}}
+@media print{body{background:#fff!important;color:#111!important;padding:0}.bottom,header,.no-print{display:none!important}.card{box-shadow:none;border:1px solid #ddd}.print-title{display:block!important}.hidden{display:none!important}}
+.print-title{display:none}
 </style></head>
 <body>
-<header><h1>دفتر کار من</h1><div class="sub">ثبت کارکرد، درآمد و دریافتی‌ها</div></header>
+<header><h1 id="appTitle">دفتر کار من</h1><div class="sub">ثبت کارکرد، درآمد و دریافتی‌ها</div></header>
 <main>
 <section id="home">
 <div class="card"><div class="sectiontitle">خلاصه امروز</div><div class="stats" id="todayStats"></div></div>
@@ -34,7 +38,7 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border-bottom:1px
 </section>
 
 <section id="calendar" class="hidden">
-<div class="card"><div class="calhead"><button class="secondary" onclick="moveMonth(-1)">‹</button><strong id="monthTitle"></strong><button class="secondary" onclick="moveMonth(1)">›</button></div><div class="calgrid" id="calendar"></div></div>
+<div class="card"><div class="calnav"><button class="secondary" onclick="moveMonth(-1)">‹</button><strong id="monthTitle"></strong><button class="secondary" onclick="moveMonth(1)">›</button></div><div class="actions" style="justify-content:center"><button class="secondary todaybtn" onclick="goToday()">امروز</button></div><div class="calgrid" id="calendar"></div><div id="monthSummary" class="month-summary"></div></div>
 <div class="card"><div class="sectiontitle">راهنما</div><div class="muted">روی هر روز بزن تا کارکرد همان روز را ببینی یا ثبت کنی.</div></div>
 </section>
 
@@ -42,7 +46,7 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border-bottom:1px
 <div class="card">
 <div class="sectiontitle" id="formTitle">ثبت روز کاری</div>
 <div class="grid">
-<div><label>تاریخ</label><input id="fdate" type="date"></div>
+<div><label>تاریخ شمسی</label><input id="fdate" inputmode="numeric" placeholder="مثلاً ۱۴۰۵/۰۶/۱۴"><input id="fdateIso" type="hidden"></div>
 <div><label>محل کار</label><input id="fplace" placeholder="مثلاً پروژه کابینت"></div>
 <div><label>ساعت کار</label><input id="fhours" type="number" min="0" step=".25" placeholder="8"></div>
 <div><label>درآمد کار</label><input id="fincome" type="number" min="0" step="1" placeholder="تومان"></div>
@@ -57,16 +61,25 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border-bottom:1px
 <section id="reports" class="hidden">
 <div class="card"><div class="sectiontitle">گزارش درآمد</div>
 <div class="grid3"><button onclick="report('day')">امروز</button><button onclick="report('week')">هفته</button><button onclick="report('month')">ماه</button></div>
-<div class="grid3" style="margin-top:8px"><button onclick="report('year')">سال</button><button class="secondary" onclick="exportData()">پشتیبان</button><button class="secondary" onclick="importData()">بازیابی</button></div>
+<div class="grid3" style="margin-top:8px"><button onclick="report('year')">سال</button><button class="secondary" onclick="exportPdf()">PDF</button><button class="secondary" onclick="exportData()">JSON</button></div>
 </div>
 <div class="card" id="reportBox"></div>
 </section>
 
 <section id="settings" class="hidden">
-<div class="card"><div class="sectiontitle">تنظیمات</div>
+<div class="card"><div class="sectiontitle">تنظیمات ظاهری</div>
 <div><label>نام دفتر</label><input id="appName" placeholder="دفتر کار من"></div>
-<div class="actions"><button onclick="saveSettings()">ذخیره تنظیمات</button><button class="secondary" onclick="exportData()">خروجی پشتیبان</button><button class="secondary" onclick="importData()">ورود پشتیبان</button></div>
+<div style="margin-top:12px"><label>انتخاب تم</label><div class="theme-grid">
+<button class="theme-btn theme-light" onclick="setTheme('light')"><div class="theme-dot"></div>روشن</button>
+<button class="theme-btn theme-dark" onclick="setTheme('dark')"><div class="theme-dot"></div>تیره</button>
+<button class="theme-btn theme-blue" onclick="setTheme('blue')"><div class="theme-dot"></div>آبی</button>
+<button class="theme-btn theme-green" onclick="setTheme('green')"><div class="theme-dot"></div>سبز</button>
+</div></div>
+<div class="actions"><button onclick="saveSettings()">ذخیره تنظیمات</button></div>
 </div>
+<div class="card"><div class="sectiontitle">پشتیبان‌گیری و بازیابی</div>
+<div class="actions"><button onclick="exportData()">پشتیبان اطلاعات (JSON)</button><button onclick="exportPdf()">پشتیبان PDF</button><button class="secondary" onclick="importData()">بازیابی اطلاعات</button></div>
+<p class="muted">نسخه JSON برای بازیابی کامل اطلاعات مناسب است. PDF برای نگهداری یا چاپ اطلاعات ثبت‌شده است.</p></div>
 <div class="card"><div class="sectiontitle">مدیریت اطلاعات</div><button class="danger" onclick="wipe()">حذف همه اطلاعات</button><p class="muted">قبل از حذف، حتماً از اطلاعات پشتیبان بگیر.</p></div>
 </section>
 </main>
@@ -80,30 +93,49 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border-bottom:1px
 </nav>
 
 <script>
-const K='workbook_v2',S='workbook_settings_v1';let db=JSON.parse(localStorage.getItem(K)||'[]'),settings=JSON.parse(localStorage.getItem(S)||'{}'),edit=null,view=new Date();
+const K='workbook_v3',S='workbook_settings_v2';
+let db=JSON.parse(localStorage.getItem(K)||localStorage.getItem('workbook_v2')||'[]'),settings=JSON.parse(localStorage.getItem(S)||localStorage.getItem('workbook_settings_v1')||'{}'),edit=null;
 const $=id=>document.getElementById(id), save=()=>localStorage.setItem(K,JSON.stringify(db));
-const today=()=>new Date().toISOString().slice(0,10), d=x=>new Date(x+'T12:00:00');
+const pad=n=>String(n).padStart(2,'0');
 const fa=n=>new Intl.NumberFormat('fa-IR').format(Math.round(n||0)), money=n=>fa(n)+' تومان';
 const sum=(a,k)=>a.reduce((v,x)=>v+(+x[k]||0),0);
-function fmt(s){return new Intl.DateTimeFormat('fa-IR',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d(s))}
-function monthName(dt){return new Intl.DateTimeFormat('fa-IR',{year:'numeric',month:'long'}).format(new Date(dt.getFullYear(),dt.getMonth(),15))}
-function show(id){document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.bottom button').forEach(x=>x.classList.toggle('active',x.dataset.s===id));if(id==='home')renderHome();if(id==='calendar')renderCalendar();if(id==='entries')renderEntries();if(id==='reports')report('month');if(id==='settings'){$('appName').value=settings.name||'دفتر کار من'}}
-function newEntry(date=today()){edit=null;$('formTitle').textContent='ثبت روز کاری';$('fdate').value=date;$('fplace').value='';$('fhours').value='';$('fincome').value='';$('fpayment').value='';$('fnote').value='';show('entries');window.scrollTo({top:0,behavior:'smooth'})}
-function resetForm(){newEntry($('fdate').value||today())}
-function saveEntry(){let e={id:edit||Date.now().toString(),date:$('fdate').value||today(),place:$('fplace').value.trim(),hours:+$('fhours').value||0,income:+$('fincome').value||0,payment:+$('fpayment').value||0,note:$('fnote').value.trim()};if(edit)db=db.map(x=>x.id===edit?e:x);else db.push(e);save();renderAll();alert('ثبت شد')}
-function editEntry(id){let x=db.find(e=>e.id===id);edit=id;$('formTitle').textContent='ویرایش روز کاری';$('fdate').value=x.date;$('fplace').value=x.place;$('fhours').value=x.hours;$('fincome').value=x.income;$('fpayment').value=x.payment;$('fnote').value=x.note;window.scrollTo({top:0,behavior:'smooth'})}
+const escapeHtml=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+function toEn(s){return String(s||'').replace(/[۰-۹]/g,c=>String('۰۱۲۳۴۵۶۷۸۹'.indexOf(c))).replace(/[٠-٩]/g,c=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(c))).replace(/-/g,'/').trim()}
+function gregorianToJalali(gy,gm,gd){let g_d_m=[0,31,59,90,120,151,181,212,243,273,304,334],jy=gy<=1600?0:979,gy2=gy<=1600?gy-621:gy-1600,days=365*gy2+Math.floor((gy2+3)/4)-Math.floor((gy2+99)/100)+Math.floor((gy2+399)/400)-80+gd+g_d_m[gm-1];if(gm>2&&((gy%4===0&&gy%100!==0)||gy%400===0))days++;jy+=33*Math.floor(days/12053);days%=12053;jy+=4*Math.floor(days/1461);days%=1461;if(days>365){jy+=Math.floor((days-1)/365);days=(days-1)%365}let jm=days<186?1+Math.floor(days/31):7+Math.floor((days-186)/30),jd=1+(days<186?days%31:(days-186)%30);return [jy,jm,jd]}
+function jalaliToGregorian(jy,jm,jd){jy=+jy;jm=+jm;jd=+jd;let approx=new Date(jy+621,2,21,12);approx.setDate(approx.getDate()+(jm<=6?(jm-1)*31:(jm-7)*30+186)+(jd-1)-3);for(let i=-400;i<=400;i++){let q=new Date(approx);q.setDate(q.getDate()+i);let j=gregorianToJalali(q.getFullYear(),q.getMonth()+1,q.getDate());if(j[0]===jy&&j[1]===jm&&j[2]===jd)return [q.getFullYear(),q.getMonth()+1,q.getDate()]}return [approx.getFullYear(),approx.getMonth()+1,approx.getDate()]}
+function isoToJ(s){let [gy,gm,gd]=s.split('-').map(Number),j=gregorianToJalali(gy,gm,gd);return `${j[0]}/${pad(j[1])}/${pad(j[2])}`}
+function jToIso(s){let m=toEn(s).match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);if(!m)return '';let [gy,gm,gd]=jalaliToGregorian(+m[1],+m[2],+m[3]);let d=new Date(gy,gm-1,gd);if(d.getFullYear()!==gy||d.getMonth()!==gm-1||d.getDate()!==gd)return '';return `${gy}-${pad(gm)}-${pad(gd)}`}
+function today(){let n=new Date();return `${n.getFullYear()}-${pad(n.getMonth()+1)}-${pad(n.getDate())}`}
+function dateObj(s){let [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d,12)}
+function fmt(s){return isoToJ(s)}
+function jalaliMonthName(y,m){return ['','فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'][m]+' '+fa(y)}
+function currentJ(){let j=gregorianToJalali(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());return {y:j[0],m:j[1]}}
+let view=currentJ();
+function show(id){document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.bottom button').forEach(x=>x.classList.toggle('active',x.dataset.s===id));if(id==='home')renderHome();if(id==='calendar')renderCalendar();if(id==='entries')renderEntries();if(id==='reports')report('month');if(id==='settings'){ $('appName').value=settings.name||'دفتر کار من';applyTheme();}}
+function newEntry(date=today()){edit=null;$('formTitle').textContent='ثبت روز کاری';$('fdateIso').value=date;$('fdate').value=fmt(date);$('fplace').value='';$('fhours').value='';$('fincome').value='';$('fpayment').value='';$('fnote').value='';show('entries');window.scrollTo({top:0,behavior:'smooth'})}
+function resetForm(){newEntry($('fdateIso').value||today())}
+function saveEntry(){let iso=jToIso($('fdate').value)||$('fdateIso').value||today();if(!iso){alert('تاریخ شمسی معتبر نیست. نمونه: ۱۴۰۵/۰۶/۱۴');return}let e={id:edit||Date.now().toString(),date:iso,place:$('fplace').value.trim(),hours:+$('fhours').value||0,income:+$('fincome').value||0,payment:+$('fpayment').value||0,note:$('fnote').value.trim()};if(edit)db=db.map(x=>x.id===edit?e:x);else db.push(e);save();renderAll();alert('ثبت شد')}
+function editEntry(id){let x=db.find(e=>e.id===id);if(!x)return;edit=id;$('formTitle').textContent='ویرایش روز کاری';$('fdateIso').value=x.date;$('fdate').value=fmt(x.date);$('fplace').value=x.place;$('fhours').value=x.hours;$('fincome').value=x.income;$('fpayment').value=x.payment;$('fnote').value=x.note;show('entries');window.scrollTo({top:0,behavior:'smooth'})}
 function del(id){if(confirm('این رکورد حذف شود؟')){db=db.filter(x=>x.id!==id);save();renderAll()}}
-function renderEntries(){let q=($('search')?.value||'').toLowerCase(),a=[...db].sort((x,y)=>y.date.localeCompare(x.date));if(q)a=a.filter(x=>(x.place+' '+x.note).toLowerCase().includes(q));if(!a.length){$('entriesList').innerHTML='<div class="empty">هنوز چیزی ثبت نشده.</div>';return} $('entriesList').innerHTML=a.map(x=>`<div class="item"><div class="itemhead"><b>${fmt(x.date)}</b><span class="badge">${x.place||'بدون محل'}</span></div><div class="muted">${fa(x.hours)} ساعت · درآمد <span class="money">${money(x.income)}</span> · دریافتی ${money(x.payment)}</div>${x.note?`<div style="margin-top:5px">${x.note}</div>`:''}<div class="actions"><button onclick="editEntry('${x.id}')">ویرایش</button><button class="danger" onclick="del('${x.id}')">حذف</button></div></div>`).join('')}
-function renderCalendar(){let y=view.getFullYear(),m=view.getMonth();$('monthTitle').textContent=monthName(view);let out=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'].map(x=>`<div class="dow">${x}</div>`).join('');let first=(new Date(y,m,1).getDay()+1)%7,days=new Date(y,m+1,0).getDate();for(let i=0;i<first;i++)out+='<div></div>';for(let n=1;n<=days;n++){let s=new Date(y,m,n).toISOString().slice(0,10),a=db.filter(x=>x.date===s);out+=`<div class="day ${s===today()?'today ':''}${a.length?'has':''}" onclick="newEntry('${s}')"><div class="num">${fa(n)}</div>${a.length?`<div class="mini"><span class="dot"></span>${fa(sum(a,'hours'))} ساعت<br>${money(sum(a,'income'))}</div>`:''}</div>`}$('calendar').innerHTML=out}
-function moveMonth(n){view.setMonth(view.getMonth()+n);renderCalendar()}
-function period(type){let now=new Date(),start,end;if(type==='day'){start=new Date(now.getFullYear(),now.getMonth(),now.getDate());end=new Date(start);end.setDate(end.getDate()+1)}if(type==='week'){let z=new Date(now.getFullYear(),now.getMonth(),now.getDate());z.setDate(z.getDate()-((z.getDay()+6)%7));start=z;end=new Date(z);end.setDate(end.getDate()+7)}if(type==='month'){start=new Date(now.getFullYear(),now.getMonth(),1);end=new Date(now.getFullYear(),now.getMonth()+1,1)}if(type==='year'){start=new Date(now.getFullYear(),0,1);end=new Date(now.getFullYear()+1,0,1)}return db.filter(x=>{let q=d(x.date);return q>=start&&q<end})}
+function renderEntries(){let q=($('search')?.value||'').toLowerCase(),a=[...db].sort((x,y)=>y.date.localeCompare(x.date));if(q)a=a.filter(x=>(x.place+' '+x.note).toLowerCase().includes(q));if(!a.length){$('entriesList').innerHTML='<div class="empty">هنوز چیزی ثبت نشده.</div>';return}$('entriesList').innerHTML=a.map(x=>`<div class="item"><div class="itemhead"><b>${fmt(x.date)}</b><span class="badge">${escapeHtml(x.place||'بدون محل')}</span></div><div class="muted">${fa(x.hours)} ساعت · درآمد <span class="money">${money(x.income)}</span> · دریافتی ${money(x.payment)}</div>${x.note?`<div style="margin-top:5px">${escapeHtml(x.note)}</div>`:''}<div class="actions"><button onclick="editEntry('${x.id}')">ویرایش</button><button class="danger" onclick="del('${x.id}')">حذف</button></div></div>`).join('')}
+function monthDays(y,m){let a=jalaliToGregorian(y,m,1);let n=addMonth(y,m,1);let b=jalaliToGregorian(n.y,n.m,1);return Math.round((new Date(b[0],b[1]-1,b[2])-new Date(a[0],a[1]-1,a[2]))/86400000)}
+function addMonth(y,m,n){let idx=y*12+(m-1)+n;return {y:Math.floor(idx/12),m:idx%12+1}}
+function jalaliWeekday(y,m,d){let g=jalaliToGregorian(y,m,d),dt=new Date(g[0],g[1]-1,g[2]);return (dt.getDay()+1)%7} // 0=شنبه ... 6=جمعه
+function renderCalendar(){let y=view.y,m=view.m;$('monthTitle').textContent=jalaliMonthName(y,m);let names=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'];let out=names.map(x=>`<div class="dow">${x}</div>`).join('');let first=jalaliWeekday(y,m,1),days=monthDays(y,m);for(let i=0;i<first;i++)out+='<div></div>';let totalHours=0,totalIncome=0,count=0;for(let n=1;n<=days;n++){let g=jalaliToGregorian(y,m,n),s=`${g[0]}-${pad(g[1])}-${pad(g[2])}`,a=db.filter(x=>x.date===s);if(a.length){count++;totalHours+=sum(a,'hours');totalIncome+=sum(a,'income')}let desc=a.map(x=>x.note||x.place||'ثبت کاری').filter(Boolean)[0]||'';out+=`<div class="day ${s===today()?'today ':''}${a.length?'has':''}" onclick="newEntry('${s}')"><div class="num">${fa(n)}</div><div class="dayname">${names[jalaliWeekday(y,m,n)]}</div>${a.length?`<div class="mini"><span class="dot"></span>${fa(sum(a,'hours'))} ساعت · ${money(sum(a,'income'))}<span class="desc">${escapeHtml(desc)}</span></div>`:''}</div>`}$('calendar').innerHTML=out;$('monthSummary').textContent=`${fa(count)} روز ثبت‌شده · ${fa(totalHours)} ساعت · ${money(totalIncome)} درآمد`}
+function moveMonth(n){view=addMonth(view.y,view.m,n);renderCalendar()}
+function goToday(){view=currentJ();renderCalendar()}
+function period(type){let now=new Date(),start,end;if(type==='day'){start=new Date(now.getFullYear(),now.getMonth(),now.getDate());end=new Date(start);end.setDate(end.getDate()+1)}if(type==='week'){let z=new Date(now.getFullYear(),now.getMonth(),now.getDate());z.setDate(z.getDate()-((z.getDay()+1)%7));start=z;end=new Date(z);end.setDate(end.getDate()+7)}if(type==='month'){start=new Date(now.getFullYear(),now.getMonth(),1);end=new Date(now.getFullYear(),now.getMonth()+1,1)}if(type==='year'){start=new Date(now.getFullYear(),0,1);end=new Date(now.getFullYear()+1,0,1)}return db.filter(x=>{let q=dateObj(x.date);return q>=start&&q<end})}
 function box(a){let i=sum(a,'income'),p=sum(a,'payment');return `<div class="stats"><div class="stat"><span>تعداد روزهای ثبت‌شده</span><b>${fa(new Set(a.map(x=>x.date)).size)}</b></div><div class="stat"><span>ساعت کار</span><b>${fa(sum(a,'hours'))}</b></div><div class="stat"><span>درآمد</span><b>${money(i)}</b></div><div class="stat"><span>دریافتی</span><b>${money(p)}</b></div></div><hr><div class="muted">مانده</div><div class="balance ${i-p>=0?'positive':'negative'}">${money(i-p)}</div>`}
-function report(type){let a=period(type);$('reportBox').innerHTML=`<div class="sectiontitle">گزارش ${type==='day'?'امروز':type==='week'?'این هفته':type==='month'?'این ماه':'امسال'}</div>${box(a)}`}
-function renderHome(){let a=period('day'),m=period('month'),all=db,i=sum(all,'income')-sum(all,'payment');$('todayStats').innerHTML=box(a);$('monthStats').innerHTML=box(m);$('totalBalance').textContent=money(i);$('totalBalance').className='balance '+(i>=0?'positive':'negative')}
-function exportData(){let payload={version:2,exportedAt:new Date().toISOString(),entries:db,settings};let blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='دفتر-کار-پشتیبان.json';a.click();URL.revokeObjectURL(u)}
-function importData(){let i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=()=>{let f=i.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x.entries))throw 0;db=x.entries;settings=x.settings||{};save();localStorage.setItem(S,JSON.stringify(settings));renderAll();alert('اطلاعات بازیابی شد')}catch(e){alert('فایل پشتیبان معتبر نیست')}};r.readAsText(f)};i.click()}
-function saveSettings(){settings.name=$('appName').value.trim()||'دفتر کار من';localStorage.setItem(S,JSON.stringify(settings));$('header');alert('ذخیره شد')}
+function report(type){let a=period(type);$('reportBox').innerHTML=`<div class="sectiontitle">گزارش ${type==='day'?'امروز':type==='week'?'این هفته':type==='month'?'این ماه':'امسال'}</div>${box(a)}<div class="actions no-print"><button onclick="exportPdf('month')">ذخیره گزارش به PDF</button></div>`}
+function renderHome(){let a=period('day'),m=period('month'),all=db,i=sum(all,'income')-sum(all,'payment');$('todayStats').innerHTML=box(a);$('monthStats').innerHTML=box(m);$('totalBalance').textContent=money(i);$('totalBalance').className='balance '+(i>=0?'positive':'negative');document.title=settings.name||'دفتر کار من';$('appTitle').textContent=settings.name||'دفتر کار من'}
+function exportData(){let payload={version:3,exportedAt:new Date().toISOString(),entries:db,settings};let blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='دفتر-کار-پشتیبان.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
+function importData(){let i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=()=>{let f=i.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x.entries))throw 0;db=x.entries;settings=x.settings||{};save();localStorage.setItem(S,JSON.stringify(settings));applyTheme();renderAll();alert('اطلاعات بازیابی شد')}catch(e){alert('فایل پشتیبان معتبر نیست')}};r.readAsText(f)};i.click()}
+function exportPdf(type='all'){let a=type==='all'?[...db]:period(type),nowJ=isoToJ(today()),rows=a.slice().sort((x,y)=>x.date.localeCompare(y.date)).map(x=>`<tr><td>${fmt(x.date)}</td><td>${escapeHtml(x.place||'')}</td><td>${fa(x.hours)}</td><td>${money(x.income)}</td><td>${money(x.payment)}</td><td>${escapeHtml(x.note||'')}</td></tr>`).join('');let w=window.open('','_blank');if(!w){alert('مرورگر اجازه باز کردن پنجره چاپ را نداده است.');return}w.document.write(`<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>پشتیبان PDF - ${escapeHtml(settings.name||'دفتر کار من')}</title><style>body{font-family:Tahoma,Arial,sans-serif;padding:24px;color:#111}h1{font-size:22px}p{color:#555}table{width:100%;border-collapse:collapse;margin-top:18px}th,td{border:1px solid #ccc;padding:8px;text-align:right;font-size:11px}th{background:#f1f5f9}.summary{margin:15px 0;padding:12px;border:1px solid #ddd;border-radius:8px}@media print{.noprint{display:none}}</style></head><body><h1>${escapeHtml(settings.name||'دفتر کار من')} — پشتیبان PDF</h1><p>تاریخ تهیه: ${nowJ}</p><div class="summary">${box(a)}</div><table><thead><tr><th>تاریخ</th><th>محل کار</th><th>ساعت</th><th>درآمد</th><th>دریافتی</th><th>یادداشت</th></tr></thead><tbody>${rows||'<tr><td colspan="6">رکوردی برای این ماه ثبت نشده است.</td></tr>'}</tbody></table><p class="noprint">از پنجره چاپ، گزینه «Save as PDF» را انتخاب کنید.</p><script>window.onload=()=>setTimeout(()=>window.print(),300)<\/script></body></html>`);w.document.close()}
+function saveSettings(){settings.name=$('appName').value.trim()||'دفتر کار من';localStorage.setItem(S,JSON.stringify(settings));applyTheme();renderAll();alert('تنظیمات ذخیره شد')}
+function setTheme(t){settings.theme=t;localStorage.setItem(S,JSON.stringify(settings));applyTheme()}
+function applyTheme(){document.body.classList.remove('theme-dark','theme-blue','theme-green');let t=settings.theme||'light';if(t!=='light')document.body.classList.add('theme-'+t);document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('selected'));let b=document.querySelector('.theme-'+t+'.theme-btn');if(b)b.classList.add('selected');let meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=t==='dark'?'#020617':t==='blue'?'#1e3a8a':t==='green'?'#166534':'#111827'}
 function wipe(){if(confirm('همه اطلاعات برای همیشه حذف شود؟')){localStorage.removeItem(K);db=[];renderAll()}}
 function renderAll(){renderHome();renderCalendar();renderEntries();if(!$('reports').classList.contains('hidden'))report('month')}
-if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');renderAll();show('home');
+$('fdate')?.addEventListener('change',()=>{let iso=jToIso($('fdate').value);if(iso)$('fdateIso').value=iso});
+applyTheme();renderAll();show('home');
 </script></body></html>
