@@ -38,6 +38,8 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border-bottom:1px
 .existing-list{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px}
 .existing-list button{font-size:11px;padding:7px 9px}
 @media(min-width:700px){.daymodal-backdrop{align-items:center}.daymodal{border-radius:20px}}
+
+.date-input-wrap{display:flex;gap:6px;align-items:stretch}.date-input-wrap input{flex:1}.date-picker-btn{width:48px;padding:0;font-size:18px}.jalali-picker{max-width:620px}.picker-grid{margin-top:12px}.picker-grid .day{min-height:64px;cursor:pointer}.picker-grid .day:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(0,0,0,.12)}.picker-grid .selected{outline:2px solid var(--primary);outline-offset:-2px}.picker-grid .today{border-width:2px}
 </style></head>
 <body>
 <header><h1 id="appTitle">دفتر کار من</h1><div class="sub">ثبت کارکرد، درآمد و دریافتی‌ها</div></header>
@@ -60,7 +62,7 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border-bottom:1px
 <div class="card">
 <div class="sectiontitle" id="formTitle">ثبت روز کاری</div>
 <div class="grid">
-<div><label>تاریخ شمسی</label><input id="fdate" inputmode="numeric" placeholder="مثلاً ۱۴۰۵/۰۶/۱۴"><input id="fdateIso" type="hidden"></div>
+<div><label>تاریخ شمسی</label><div class="date-input-wrap"><input id="fdate" inputmode="numeric" placeholder="مثلاً ۱۴۰۵/۰۶/۱۴" readonly onclick="openJalaliPicker()"><button type="button" class="date-picker-btn" onclick="openJalaliPicker()">📅</button></div><input id="fdateIso" type="hidden"></div>
 <div><label>محل کار</label><input id="fplace" placeholder="مثلاً پروژه کابینت"></div>
 <div><label>ساعت کار</label><input id="fhours" type="number" min="0" step=".25" placeholder="8"></div>
 <div><label>درآمد کار</label><input id="fincome" type="number" min="0" step="1" placeholder="تومان"></div>
@@ -100,6 +102,14 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border-bottom:1px
 <div class="card"><div class="sectiontitle">مدیریت اطلاعات</div><button class="danger" onclick="wipe()">حذف همه اطلاعات</button><p class="muted">قبل از حذف، حتماً از اطلاعات پشتیبان بگیر.</p></div>
 </section>
 </main>
+<div id="jalaliPickerBackdrop" class="daymodal-backdrop hidden" onclick="closeJalaliPicker(event)">
+  <div class="daymodal jalali-picker" onclick="event.stopPropagation()">
+    <div class="daymodal-head"><strong>انتخاب تاریخ شمسی</strong><button type="button" class="iconbtn" onclick="closeJalaliPicker()">✕</button></div>
+    <div class="calnav"><button type="button" class="secondary" onclick="pickerMoveMonth(-1)">‹</button><strong id="pickerMonthTitle"></strong><button type="button" class="secondary" onclick="pickerMoveMonth(1)">›</button></div>
+    <div class="actions" style="justify-content:center"><button type="button" class="secondary" onclick="pickerGoToday()">امروز</button></div>
+    <div class="calgrid picker-grid" id="pickerCalendar"></div>
+  </div>
+</div>
 <div id="dayModalBackdrop" class="daymodal-backdrop hidden" onclick="closeDayModal(event)">
   <div class="daymodal" onclick="event.stopPropagation()">
     <div class="daymodal-head">
@@ -162,7 +172,7 @@ function clearFilters(){if($('search'))$('search').value='';if($('fromDate'))$('
 function monthDays(y,m){let a=jalaliToGregorian(y,m,1);let n=addMonth(y,m,1);let b=jalaliToGregorian(n.y,n.m,1);return Math.round((new Date(b[0],b[1]-1,b[2])-new Date(a[0],a[1]-1,a[2]))/86400000)}
 function addMonth(y,m,n){let idx=y*12+(m-1)+n;return {y:Math.floor(idx/12),m:idx%12+1}}
 function jalaliWeekday(y,m,d){let g=jalaliToGregorian(y,m,d),dt=new Date(g[0],g[1]-1,g[2]);return (dt.getDay()+1)%7} // 0=شنبه ... 6=جمعه
-function renderCalendar(){let y=view.y,m=view.m;$('monthTitle').textContent=jalaliMonthName(y,m);if($('jumpYear'))$('jumpYear').value=fa(y);if($('jumpMonth'))$('jumpMonth').innerHTML=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'].map((x,i)=>`<option value="${i+1}" ${i+1===m?'selected':''}>${x}</option>`).join('');let names=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'];let out=names.map(x=>`<div class="dow">${x}</div>`).join('');let first=jalaliWeekday(y,m,1),days=monthDays(y,m);for(let i=0;i<first;i++)out+='<div></div>';let totalHours=0,totalIncome=0,count=0;for(let n=1;n<=days;n++){let g=jalaliToGregorian(y,m,n),s=`${g[0]}-${pad(g[1])}-${pad(g[2])}`,a=db.filter(x=>x.date===s);if(a.length){count++;totalHours+=sum(a,'hours');totalIncome+=sum(a,'income')}let desc=a.map(x=>x.note||x.place||'ثبت کاری').filter(Boolean)[0]||'';out+=`<div class="day ${s===today()?'today ':''}${a.length?'has ':''}${[5,6].includes(jalaliWeekday(y,m,n))?'weekend':''}" onclick="openDayModal('${s}')" title="${a.length?'برای مشاهده یا ویرایش بزنید':'برای ثبت کار بزنید'}"><div class="num">${fa(n)}</div>${a.length?`<div class="mini"><div class="workline"><span class="dot"></span>${fa(sum(a,'hours'))} ساعت</div><div class="moneyline">درآمد: ${money(sum(a,'income'))}</div><div class="desc">${escapeHtml(desc)}</div></div>`:`<div class="mini"><div class="moneyline">＋ ثبت کار</div></div>`}</div>`}$('calendar').innerHTML=out;$('monthSummary').textContent=`${fa(count)} روز ثبت‌شده · ${fa(totalHours)} ساعت · ${money(totalIncome)} درآمد`}
+function renderCalendar(){let y=view.y,m=view.m;$('monthTitle').textContent=jalaliMonthName(y,m);if($('jumpYear'))$('jumpYear').value=fa(y);if($('jumpMonth'))$('jumpMonth').innerHTML=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'].map((x,i)=>`<option value="${i+1}" ${i+1===m?'selected':''}>${x}</option>`).join('');let names=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'];let out=names.map(x=>`<div class="dow">${x}</div>`).join('');let first=jalaliWeekday(y,m,1),days=monthDays(y,m);for(let i=0;i<first;i++)out+='<div></div>';let totalHours=0,totalIncome=0,count=0;for(let n=1;n<=days;n++){let g=jalaliToGregorian(y,m,n),s=`${g[0]}-${pad(g[1])}-${pad(g[2])}`,a=db.filter(x=>x.date===s);if(a.length){count++;totalHours+=sum(a,'hours');totalIncome+=sum(a,'income')}let desc=a.map(x=>x.note||x.place||'ثبت کاری').filter(Boolean)[0]||'';out+=`<div class="day ${s===today()?'today ':''}${a.length?'has ':''}${[5,6].includes(jalaliWeekday(y,m,n))?'weekend':''}" onclick="openDay('${s}')" title="${a.length?'برای مشاهده یا ویرایش بزنید':'برای ثبت کار بزنید'}"><div class="num">${fa(n)}</div>${a.length?`<div class="mini"><div class="workline"><span class="dot"></span>${fa(sum(a,'hours'))} ساعت</div><div class="moneyline">درآمد: ${money(sum(a,'income'))}</div><div class="desc">${escapeHtml(desc)}</div></div>`:`<div class="mini"><div class="moneyline">＋ ثبت کار</div></div>`}</div>`}$('calendar').innerHTML=out;$('monthSummary').textContent=`${fa(count)} روز ثبت‌شده · ${fa(totalHours)} ساعت · ${money(totalIncome)} درآمد`}
 
 let modalDate='', modalEdit=null;
 function openDay(iso){
@@ -216,6 +226,19 @@ function setTheme(t){settings.theme=t;localStorage.setItem(S,JSON.stringify(sett
 function applyTheme(){document.body.classList.remove('theme-dark','theme-blue','theme-green','theme-auto');let t=settings.theme||'light';if(t!=='light')document.body.classList.add('theme-'+t);document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('selected'));let b=document.querySelector('.theme-'+t+'.theme-btn');if(b)b.classList.add('selected');let meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=t==='dark'?'#020617':t==='blue'?'#1e3a8a':t==='green'?'#166534':'#111827'}
 function wipe(){if(confirm('همه اطلاعات برای همیشه حذف شود؟')){localStorage.removeItem(K);db=[];renderAll()}}
 function renderAll(){renderHome();renderCalendar();renderEntries();if(!$('reports').classList.contains('hidden'))report('month')}
+
+let pickerView=currentJ();
+function openJalaliPicker(){
+  let cur=$('fdate').value?toEn($('fdate').value).split('/').map(Number):null;
+  pickerView=cur&&cur.length===3&&cur[0]?{y:cur[0],m:cur[1]}:currentJ();
+  renderJalaliPicker(); $('jalaliPickerBackdrop').classList.remove('hidden');
+}
+function closeJalaliPicker(ev){if(ev&&ev.target!==$('jalaliPickerBackdrop'))return;$('jalaliPickerBackdrop').classList.add('hidden')}
+function pickerMoveMonth(n){pickerView=addMonth(pickerView.y,pickerView.m,n);renderJalaliPicker()}
+function pickerGoToday(){pickerView=currentJ();renderJalaliPicker()}
+function choosePickerDate(y,m,d){let g=jalaliToGregorian(y,m,d),iso=`${g[0]}-${pad(g[1])}-${pad(g[2])}`;$('fdate').value=`${fa(y)}/${pad(m)}/${pad(d)}`;$('fdateIso').value=iso;closeJalaliPicker()}
+function renderJalaliPicker(){let y=pickerView.y,m=pickerView.m;$('pickerMonthTitle').textContent=jalaliMonthName(y,m);let names=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'];let out=names.map(x=>`<div class="dow">${x}</div>`).join('');let first=jalaliWeekday(y,m,1),days=monthDays(y,m),selected=toEn($('fdate').value||'').split('/').map(Number),sel=selected.length===3?`${selected[0]}-${selected[1]}-${selected[2]}`:'';for(let i=0;i<first;i++)out+='<div></div>';for(let n=1;n<=days;n++){let g=jalaliToGregorian(y,m,n),s=`${g[0]}-${pad(g[1])}-${pad(g[2])}`,cls=`day ${s===today()?'today ':''}${s===sel?'selected ':''}${[5,6].includes(jalaliWeekday(y,m,n))?'weekend':''}`;out+=`<div class="${cls}" onclick="choosePickerDate(${y},${m},${n})"><div class="num">${fa(n)}</div></div>`}$('pickerCalendar').innerHTML=out}
+
 $('fdate')?.addEventListener('change',()=>{let iso=jToIso($('fdate').value);if(iso)$('fdateIso').value=iso});
 applyTheme();renderAll();show('home');
 </script></body></html>
