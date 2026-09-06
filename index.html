@@ -64,6 +64,8 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border-bottom:1px
 <div class="grid">
 <div><label>تاریخ شمسی</label><div class="date-input-wrap"><input id="fdate" inputmode="numeric" placeholder="مثلاً ۱۴۰۵/۰۶/۱۴" readonly onclick="openJalaliPicker()"><button type="button" class="date-picker-btn" onclick="openJalaliPicker()">📅</button></div><input id="fdateIso" type="hidden"></div>
 <div><label>محل کار</label><input id="fplace" placeholder="مثلاً پروژه کابینت"></div>
+<div><label>ساعت شروع کار (اختیاری)</label><input id="fstart" type="time" oninput="autoCalcHours('fstart','fend','fhours')"></div>
+<div><label>ساعت پایان کار (اختیاری)</label><input id="fend" type="time" oninput="autoCalcHours('fstart','fend','fhours')"></div>
 <div><label>ساعت کار</label><input id="fhours" type="number" min="0" step=".25" placeholder="8"></div>
 <div><label>درآمد کار</label><input id="fincome" type="number" min="0" step="1" placeholder="تومان"></div>
 <div><label>دریافتی / واریزی</label><input id="fpayment" type="number" min="0" step="1" placeholder="تومان"></div>
@@ -99,6 +101,12 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border-bottom:1px
 <div class="card"><div class="sectiontitle">پشتیبان‌گیری و بازیابی</div>
 <div class="actions"><button onclick="exportData()">پشتیبان اطلاعات (JSON)</button><button onclick="exportPdf()">پشتیبان PDF</button><button class="secondary" onclick="importData()">بازیابی اطلاعات</button></div>
 <p class="muted">نسخه JSON برای بازیابی کامل اطلاعات مناسب است. PDF برای نگهداری یا چاپ اطلاعات ثبت‌شده است.</p></div>
+<div class="card"><div class="sectiontitle">پشتیبان متنی برای آپدیت برنامه</div>
+<p class="muted">قبل از آپدیت کردن فایل‌های برنامه (مثلاً روی گیت‌هاب)، دکمه «تهیه متن پشتیبان» را بزن، متن داخل کادر را کپی کن و یک‌جای امن (مثل یادداشت گوشی) نگه دار. بعد از آپدیت، همان متن را در همین کادر پیست کن و «بازیابی از متن» را بزن؛ دقیقاً مثل کپی/پیست.</p>
+<div class="actions"><button class="secondary" onclick="showBackupText()">۱) تهیه متن پشتیبان</button><button class="secondary" onclick="copyBackupText()">۲) کپی متن</button></div>
+<textarea id="backupTextArea" placeholder="بعد از زدن «تهیه متن پشتیبان» متن اینجا نشان داده می‌شود؛ یا برای بازیابی، متن پشتیبان قبلی را همینجا پیست کن." style="min-height:110px;font-size:10px;direction:ltr;text-align:left"></textarea>
+<div class="actions" style="margin-top:8px"><button onclick="restoreFromText()">۳) بازیابی از متن</button><button class="secondary" onclick="$('backupTextArea').value=''">پاک کردن کادر</button></div>
+</div>
 <div class="card"><div class="sectiontitle">مدیریت اطلاعات</div><button class="danger" onclick="wipe()">حذف همه اطلاعات</button><p class="muted">قبل از حذف، حتماً از اطلاعات پشتیبان بگیر.</p></div>
 </section>
 </main>
@@ -120,6 +128,8 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border-bottom:1px
     <div class="grid">
       <div><label>تاریخ شمسی</label><input id="mdate" readonly></div>
       <div><label>محل کار</label><input id="mplace" placeholder="مثلاً پروژه کابینت"></div>
+      <div><label>ساعت شروع کار (اختیاری)</label><input id="mstart" type="time" oninput="autoCalcHours('mstart','mend','mhours')"></div>
+      <div><label>ساعت پایان کار (اختیاری)</label><input id="mend" type="time" oninput="autoCalcHours('mstart','mend','mhours')"></div>
       <div><label>ساعت کار</label><input id="mhours" type="number" min="0" step=".25" placeholder="8"></div>
       <div><label>درآمد کار</label><input id="mincome" type="number" min="0" step="1" placeholder="تومان"></div>
       <div><label>دریافتی / واریزی</label><input id="mpayment" type="number" min="0" step="1" placeholder="تومان"></div>
@@ -163,12 +173,13 @@ function jalaliMonthName(y,m){return ['','فروردین','اردیبهشت','خ
 function currentJ(){let j=gregorianToJalali(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());return {y:j[0],m:j[1]}}
 let view=currentJ();
 function show(id){document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.bottom button').forEach(x=>x.classList.toggle('active',x.dataset.s===id));if(id==='home')renderHome();if(id==='calendar')renderCalendar();if(id==='entries')renderEntries();if(id==='reports')report('month');if(id==='settings'){ $('appName').value=settings.name||'دفتر کار من';applyTheme();}}
-function newEntry(date=today()){edit=null;$('formTitle').textContent='ثبت روز کاری';$('fdateIso').value=date;$('fdate').value=fmt(date);$('fplace').value='';$('fhours').value='';$('fincome').value='';$('fpayment').value='';$('fnote').value='';show('entries');window.scrollTo({top:0,behavior:'smooth'})}
+function newEntry(date=today()){edit=null;$('formTitle').textContent='ثبت روز کاری';$('fdateIso').value=date;$('fdate').value=fmt(date);$('fplace').value='';$('fstart').value='';$('fend').value='';$('fhours').value='';$('fincome').value='';$('fpayment').value='';$('fnote').value='';show('entries');window.scrollTo({top:0,behavior:'smooth'})}
 function resetForm(){newEntry($('fdateIso').value||today())}
-function saveEntry(){let iso=jToIso($('fdate').value)||$('fdateIso').value||today();if(!iso){alert('تاریخ شمسی معتبر نیست. نمونه: ۱۴۰۵/۰۶/۱۴');return}let e={id:edit||Date.now().toString(),date:iso,place:$('fplace').value.trim(),hours:+$('fhours').value||0,income:+$('fincome').value||0,payment:+$('fpayment').value||0,note:$('fnote').value.trim()};if(edit)db=db.map(x=>x.id===edit?e:x);else db.push(e);save();renderAll();alert('ثبت شد')}
-function editEntry(id){let x=db.find(e=>e.id===id);if(!x)return;edit=id;$('formTitle').textContent='ویرایش روز کاری';$('fdateIso').value=x.date;$('fdate').value=fmt(x.date);$('fplace').value=x.place;$('fhours').value=x.hours;$('fincome').value=x.income;$('fpayment').value=x.payment;$('fnote').value=x.note;show('entries');window.scrollTo({top:0,behavior:'smooth'})}
+function autoCalcHours(startId,endId,hoursId){let s=$(startId).value,e=$(endId).value;if(!s||!e)return;let[sh,sm]=s.split(':').map(Number),[eh,em]=e.split(':').map(Number);let mins=(eh*60+em)-(sh*60+sm);if(mins<0)mins+=24*60;$(hoursId).value=Math.round((mins/60)*100)/100}
+function saveEntry(){let iso=jToIso($('fdate').value)||$('fdateIso').value||today();if(!iso){alert('تاریخ شمسی معتبر نیست. نمونه: ۱۴۰۵/۰۶/۱۴');return}let e={id:edit||Date.now().toString(),date:iso,place:$('fplace').value.trim(),start:$('fstart').value||'',end:$('fend').value||'',hours:+$('fhours').value||0,income:+$('fincome').value||0,payment:+$('fpayment').value||0,note:$('fnote').value.trim()};if(edit)db=db.map(x=>x.id===edit?e:x);else db.push(e);save();renderAll();alert('ثبت شد')}
+function editEntry(id){let x=db.find(e=>e.id===id);if(!x)return;edit=id;$('formTitle').textContent='ویرایش روز کاری';$('fdateIso').value=x.date;$('fdate').value=fmt(x.date);$('fplace').value=x.place;$('fstart').value=x.start||'';$('fend').value=x.end||'';$('fhours').value=x.hours;$('fincome').value=x.income;$('fpayment').value=x.payment;$('fnote').value=x.note;show('entries');window.scrollTo({top:0,behavior:'smooth'})}
 function del(id){if(confirm('این رکورد حذف شود؟')){db=db.filter(x=>x.id!==id);save();renderAll()}}
-function renderEntries(){let q=($('search')?.value||'').toLowerCase().trim(),from=jToIso($('fromDate')?.value||''),to=jToIso($('toDate')?.value||''),a=[...db].sort((x,y)=>y.date.localeCompare(x.date));if(q)a=a.filter(x=>(x.place+' '+x.note).toLowerCase().includes(q));if(from)a=a.filter(x=>x.date>=from);if(to)a=a.filter(x=>x.date<=to);if(!a.length){$('entriesList').innerHTML='<div class="empty">موردی پیدا نشد.</div>';return}$('entriesList').innerHTML=a.map(x=>`<div class="item"><div class="itemhead"><b>${fmt(x.date)}</b><span class="badge">${escapeHtml(x.place||'بدون محل')}</span></div><div class="muted">${fa(x.hours)} ساعت · درآمد <span class="money">${money(x.income)}</span> · دریافتی ${money(x.payment)}</div>${x.note?`<div style="margin-top:5px">${escapeHtml(x.note)}</div>`:''}<div class="actions"><button onclick="editEntry('${x.id}')">ویرایش</button><button class="danger" onclick="del('${x.id}')">حذف</button></div></div>`).join('')}
+function renderEntries(){let q=($('search')?.value||'').toLowerCase().trim(),from=jToIso($('fromDate')?.value||''),to=jToIso($('toDate')?.value||''),a=[...db].sort((x,y)=>y.date.localeCompare(x.date));if(q)a=a.filter(x=>(x.place+' '+x.note).toLowerCase().includes(q));if(from)a=a.filter(x=>x.date>=from);if(to)a=a.filter(x=>x.date<=to);if(!a.length){$('entriesList').innerHTML='<div class="empty">موردی پیدا نشد.</div>';return}$('entriesList').innerHTML=a.map(x=>`<div class="item"><div class="itemhead"><b>${fmt(x.date)}</b><span class="badge">${escapeHtml(x.place||'بدون محل')}</span></div><div class="muted">${x.start&&x.end?`${x.start} تا ${x.end} · `:''}${fa(x.hours)} ساعت · درآمد <span class="money">${money(x.income)}</span> · دریافتی ${money(x.payment)}</div>${x.note?`<div style="margin-top:5px">${escapeHtml(x.note)}</div>`:''}<div class="actions"><button onclick="editEntry('${x.id}')">ویرایش</button><button class="danger" onclick="del('${x.id}')">حذف</button></div></div>`).join('')}
 function clearFilters(){if($('search'))$('search').value='';if($('fromDate'))$('fromDate').value='';if($('toDate'))$('toDate').value='';renderEntries()}
 function monthDays(y,m){let a=jalaliToGregorian(y,m,1);let n=addMonth(y,m,1);let b=jalaliToGregorian(n.y,n.m,1);return Math.round((new Date(b[0],b[1]-1,b[2])-new Date(a[0],a[1]-1,a[2]))/86400000)}
 function addMonth(y,m,n){let idx=y*12+(m-1)+n;return {y:Math.floor(idx/12),m:idx%12+1}}
@@ -189,21 +200,21 @@ function openDay(iso){
 function renderDayModalList(){
   let a=db.filter(e=>e.date===modalDate);
   $('dayExisting').innerHTML=a.length
-    ? a.map((e,i)=>`<button class="secondary" onclick="selectDayModal('${e.id}')">${fa(i+1)} · ${escapeHtml(e.place||'بدون محل')} · ${fa(e.hours||0)}ساعت</button>`).join('')
+    ? a.map((e,i)=>`<button class="secondary" onclick="selectDayModal('${e.id}')">${fa(i+1)} · ${escapeHtml(e.place||'بدون محل')} · ${fa(e.hours||0)}ساعت${e.start&&e.end?` (${e.start}-${e.end})`:''}</button>`).join('')
     : '<span class="muted">برای این روز هنوز کاری ثبت نشده است.</span>';
 }
 function clearDayModalFields(){
   modalEdit=null;
-  $('mplace').value='';$('mhours').value='';$('mincome').value='';$('mpayment').value='';$('mnote').value='';
+  $('mplace').value='';$('mstart').value='';$('mend').value='';$('mhours').value='';$('mincome').value='';$('mpayment').value='';$('mnote').value='';
 }
 function fillDayModal(e){
   modalEdit=e.id;
-  $('mplace').value=e.place||'';$('mhours').value=e.hours||'';$('mincome').value=e.income||'';$('mpayment').value=e.payment||'';$('mnote').value=e.note||'';
+  $('mplace').value=e.place||'';$('mstart').value=e.start||'';$('mend').value=e.end||'';$('mhours').value=e.hours||'';$('mincome').value=e.income||'';$('mpayment').value=e.payment||'';$('mnote').value=e.note||'';
 }
 function selectDayModal(id){let e=db.find(x=>x.id===id);if(e){fillDayModal(e);}}
 function newDayModalEntry(){clearDayModalFields();$('mplace').focus();}
 function saveDayModal(){
-  let e={id:modalEdit||Date.now().toString(),date:modalDate,place:$('mplace').value.trim(),hours:+$('mhours').value||0,income:+$('mincome').value||0,payment:+$('mpayment').value||0,note:$('mnote').value.trim()};
+  let e={id:modalEdit||Date.now().toString(),date:modalDate,place:$('mplace').value.trim(),start:$('mstart').value||'',end:$('mend').value||'',hours:+$('mhours').value||0,income:+$('mincome').value||0,payment:+$('mpayment').value||0,note:$('mnote').value.trim()};
   if(!e.place&&!e.hours&&!e.income&&!e.payment&&!e.note){alert('حداقل یک مورد را وارد کنید.');return}
   if(modalEdit) db=db.map(x=>x.id===modalEdit?e:x); else db.push(e);
   save(); renderAll(); renderDayModalList(); clearDayModalFields();
@@ -221,6 +232,10 @@ function report(type){let a=period(type);$('reportBox').innerHTML=`<div class="s
 function renderHome(){let a=period('day'),m=period('month'),all=db,i=sum(all,'income')-sum(all,'payment'),days=new Set(m.map(x=>x.date)).size,hours=sum(m,'hours'),income=sum(m,'income'),payment=sum(m,'payment');$('dashboardKpis').innerHTML=`<div class="home-kpi"><span>درآمد این ماه</span><b>${money(income)}</b></div><div class="home-kpi"><span>دریافتی این ماه</span><b>${money(payment)}</b></div><div class="home-kpi"><span>روزهای کاری</span><b>${fa(days)}</b></div><div class="home-kpi"><span>ساعت کار</span><b>${fa(hours)} ساعت</b></div>`;$('todayStats').innerHTML=box(a);$('monthStats').innerHTML=box(m);$('totalBalance').textContent=money(i);$('totalBalance').className='balance '+(i>=0?'positive':'negative');document.title=settings.name||'دفتر کار من';$('appTitle').textContent=settings.name||'دفتر کار من'}
 function exportData(){let payload={version:3,exportedAt:new Date().toISOString(),entries:db,settings};let blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='دفتر-کار-پشتیبان.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
 function importData(){let i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=()=>{let f=i.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x.entries))throw 0;db=x.entries;settings=x.settings||{};save();localStorage.setItem(S,JSON.stringify(settings));applyTheme();renderAll();alert('اطلاعات بازیابی شد')}catch(e){alert('فایل پشتیبان معتبر نیست')}};r.readAsText(f)};i.click()}
+function buildBackupPayload(){return JSON.stringify({version:3,exportedAt:new Date().toISOString(),entries:db,settings})}
+function showBackupText(){let ta=$('backupTextArea');ta.value=buildBackupPayload();ta.focus();ta.select()}
+function copyBackupText(){let ta=$('backupTextArea');if(!ta.value.trim())ta.value=buildBackupPayload();ta.focus();ta.select();try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ta.value).then(()=>alert('متن پشتیبان کپی شد.')).catch(()=>{document.execCommand('copy');alert('متن پشتیبان کپی شد.')})}else{document.execCommand('copy');alert('متن پشتیبان کپی شد.')}}catch(e){alert('کپی خودکار انجام نشد؛ متن انتخاب شده است، خودت با نگه‌داشتن انگشت روی متن آن را کپی کن.')}}
+function restoreFromText(){let raw=($('backupTextArea').value||'').trim();if(!raw){alert('اول متن پشتیبان را در کادر پیست کن.');return}try{let x=JSON.parse(raw);if(!Array.isArray(x.entries))throw 0;if(!confirm('اطلاعات فعلی برنامه با این متن پشتیبان جایگزین شود؟')){return}db=x.entries;settings=x.settings||{};save();localStorage.setItem(S,JSON.stringify(settings));applyTheme();renderAll();alert('اطلاعات از روی متن بازیابی شد')}catch(e){alert('متن واردشده یک پشتیبان معتبر نیست.')}}
 function exportPdf(type='all'){let a=type==='all'?[...db]:period(type),nowJ=isoToJ(today()),rows=a.slice().sort((x,y)=>x.date.localeCompare(y.date)).map(x=>`<tr><td>${fmt(x.date)}</td><td>${escapeHtml(x.place||'')}</td><td>${fa(x.hours)}</td><td>${money(x.income)}</td><td>${money(x.payment)}</td><td>${escapeHtml(x.note||'')}</td></tr>`).join('');let w=window.open('','_blank');if(!w){alert('مرورگر اجازه باز کردن پنجره چاپ را نداده است.');return}w.document.write(`<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>پشتیبان PDF - ${escapeHtml(settings.name||'دفتر کار من')}</title><style>body{font-family:Tahoma,Arial,sans-serif;padding:24px;color:#111}h1{font-size:22px}p{color:#555}table{width:100%;border-collapse:collapse;margin-top:18px}th,td{border:1px solid #ccc;padding:8px;text-align:right;font-size:11px}th{background:#f1f5f9}.summary{margin:15px 0;padding:12px;border:1px solid #ddd;border-radius:8px}@media print{.noprint{display:none}}</style></head><body><h1>${escapeHtml(settings.name||'دفتر کار من')} — پشتیبان PDF</h1><p>تاریخ تهیه: ${nowJ}</p><div class="summary">${box(a)}</div><table><thead><tr><th>تاریخ</th><th>محل کار</th><th>ساعت</th><th>درآمد</th><th>دریافتی</th><th>یادداشت</th></tr></thead><tbody>${rows||'<tr><td colspan="6">رکوردی برای این ماه ثبت نشده است.</td></tr>'}</tbody></table><p class="noprint">از پنجره چاپ، گزینه «Save as PDF» را انتخاب کنید.</p><script>window.onload=()=>setTimeout(()=>window.print(),300)<\/script></body></html>`);w.document.close()}
 function saveSettings(){settings.name=$('appName').value.trim()||'دفتر کار من';localStorage.setItem(S,JSON.stringify(settings));applyTheme();renderAll();alert('تنظیمات ذخیره شد')}
 function setTheme(t){settings.theme=t;localStorage.setItem(S,JSON.stringify(settings));applyTheme()}
