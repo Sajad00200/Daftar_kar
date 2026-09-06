@@ -42,7 +42,7 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border-bottom:1px
 .date-input-wrap{display:flex;gap:6px;align-items:stretch}.date-input-wrap input{flex:1}.date-picker-btn{width:48px;padding:0;font-size:18px}.jalali-picker{max-width:620px}.picker-grid{margin-top:12px}.picker-grid .day{min-height:64px;cursor:pointer}.picker-grid .day:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(0,0,0,.12)}.picker-grid .selected{outline:2px solid var(--primary);outline-offset:-2px}.picker-grid .today{border-width:2px}
 </style></head>
 <body>
-<header><h1 id="appTitle">دفتر کار من</h1><div class="sub">ثبت کارکرد، درآمد و دریافتی‌ها</div></header>
+<header><h1 id="appTitle">دفتر کار من</h1><div class="sub" id="appSub">ثبت کارکرد، درآمد و دریافتی‌ها</div></header>
 <main>
 <section id="home">
 <div class="quickbar"><button onclick="newEntry()">＋ ثبت سریع کار</button></div>
@@ -87,6 +87,12 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border-bottom:1px
 </section>
 
 <section id="settings" class="hidden">
+<div class="card"><div class="sectiontitle">کارفرما / پروژه فعال</div>
+<p class="muted">اگر با چند نفر کار می‌کنی (مثلاً امروز برای علی، فردا برای رضا)، برای هرکدوم یک کارفرمای جدا بساز. حساب و کارکرد هرکدوم کاملاً جدا ذخیره می‌شود و با هم قاطی نمی‌شوند.</p>
+<label>کارفرما/پروژه فعال</label>
+<select id="workspaceSelect" onchange="switchWorkspace(this.value)"></select>
+<div class="actions" style="margin-top:10px"><button class="secondary" onclick="addWorkspace()">＋ کارفرمای جدید</button><button class="secondary" onclick="renameWorkspace()">ویرایش نام</button><button class="danger" onclick="deleteWorkspace()">حذف این کارفرما</button></div>
+</div>
 <div class="card"><div class="sectiontitle">تنظیمات ظاهری</div>
 <div><label>نام دفتر</label><input id="appName" placeholder="دفتر کار من"></div>
 <div style="margin-top:12px"><label>انتخاب تم</label><div class="theme-grid">
@@ -107,7 +113,7 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border-bottom:1px
 <textarea id="backupTextArea" placeholder="بعد از زدن «تهیه متن پشتیبان» متن اینجا نشان داده می‌شود؛ یا برای بازیابی، متن پشتیبان قبلی را همینجا پیست کن." style="min-height:110px;font-size:10px;direction:ltr;text-align:left"></textarea>
 <div class="actions" style="margin-top:8px"><button onclick="restoreFromText()">۳) بازیابی از متن</button><button class="secondary" onclick="$('backupTextArea').value=''">پاک کردن کادر</button></div>
 </div>
-<div class="card"><div class="sectiontitle">مدیریت اطلاعات</div><button class="danger" onclick="wipe()">حذف همه اطلاعات</button><p class="muted">قبل از حذف، حتماً از اطلاعات پشتیبان بگیر.</p></div>
+<div class="card"><div class="sectiontitle">مدیریت اطلاعات</div><button class="danger" onclick="wipe()">حذف اطلاعات این کارفرما</button><p class="muted">فقط اطلاعات کارفرمای فعلی پاک می‌شود، نه کارفرماهای دیگر. قبل از حذف، حتماً از اطلاعات پشتیبان بگیر.</p></div>
 </section>
 </main>
 <div id="jalaliPickerBackdrop" class="daymodal-backdrop hidden" onclick="closeJalaliPicker(event)">
@@ -154,8 +160,25 @@ table{width:100%;border-collapse:collapse;font-size:11px}th,td{border-bottom:1px
 
 <script>
 const K='workbook_v3',S='workbook_settings_v2';
-let db=JSON.parse(localStorage.getItem(K)||localStorage.getItem('workbook_v2')||'[]'),settings=JSON.parse(localStorage.getItem(S)||localStorage.getItem('workbook_settings_v1')||'{}'),edit=null;
-const $=id=>document.getElementById(id), save=()=>localStorage.setItem(K,JSON.stringify(db));
+let settings=JSON.parse(localStorage.getItem(S)||localStorage.getItem('workbook_settings_v1')||'{}');
+function wsKey(id){return K+'__ws_'+id}
+function ensureWorkspaces(){
+  if(!Array.isArray(settings.workspaces)||!settings.workspaces.length){
+    settings.workspaces=[{id:'default',name:settings.name||'پیش‌فرض'}];
+    settings.activeWorkspace='default';
+    let legacy=localStorage.getItem(K)||localStorage.getItem('workbook_v2');
+    if(legacy && !localStorage.getItem(wsKey('default')))localStorage.setItem(wsKey('default'),legacy);
+    localStorage.setItem(S,JSON.stringify(settings));
+  }
+  if(!settings.activeWorkspace||!settings.workspaces.some(w=>w.id===settings.activeWorkspace)){
+    settings.activeWorkspace=settings.workspaces[0].id;
+    localStorage.setItem(S,JSON.stringify(settings));
+  }
+}
+ensureWorkspaces();
+function loadDb(id){return JSON.parse(localStorage.getItem(wsKey(id))||'[]')}
+let db=loadDb(settings.activeWorkspace),edit=null;
+const $=id=>document.getElementById(id), save=()=>localStorage.setItem(wsKey(settings.activeWorkspace),JSON.stringify(db));
 const pad=n=>String(n).padStart(2,'0');
 const fa=n=>new Intl.NumberFormat('fa-IR').format(Math.round(n||0)), money=n=>fa(n)+' تومان';
 const faY=n=>String(Math.round(n||0)).replace(/[0-9]/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
@@ -172,7 +195,7 @@ function fmt(s){return isoToJ(s)}
 function jalaliMonthName(y,m){return ['','فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'][m]+' '+faY(y)}
 function currentJ(){let j=gregorianToJalali(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());return {y:j[0],m:j[1]}}
 let view=currentJ();
-function show(id){document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.bottom button').forEach(x=>x.classList.toggle('active',x.dataset.s===id));if(id==='home')renderHome();if(id==='calendar')renderCalendar();if(id==='entries')renderEntries();if(id==='reports')report('month');if(id==='settings'){ $('appName').value=settings.name||'دفتر کار من';applyTheme();}}
+function show(id){document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.bottom button').forEach(x=>x.classList.toggle('active',x.dataset.s===id));if(id==='home')renderHome();if(id==='calendar')renderCalendar();if(id==='entries')renderEntries();if(id==='reports')report('month');if(id==='settings'){ $('appName').value=settings.name||'دفتر کار من';applyTheme();renderWorkspaceUI();}}
 function newEntry(date=today()){edit=null;$('formTitle').textContent='ثبت روز کاری';$('fdateIso').value=date;$('fdate').value=fmt(date);$('fplace').value='';$('fstart').value='';$('fend').value='';$('fhours').value='';$('fincome').value='';$('fpayment').value='';$('fnote').value='';show('entries');window.scrollTo({top:0,behavior:'smooth'})}
 function resetForm(){newEntry($('fdateIso').value||today())}
 function autoCalcHours(startId,endId,hoursId){let s=$(startId).value,e=$(endId).value;if(!s||!e)return;let[sh,sm]=s.split(':').map(Number),[eh,em]=e.split(':').map(Number);let mins=(eh*60+em)-(sh*60+sm);if(mins<0)mins+=24*60;$(hoursId).value=Math.round((mins/60)*100)/100}
@@ -230,18 +253,78 @@ function period(type){let now=new Date(),start,end;if(type==='day'){start=new Da
 function box(a){let i=sum(a,'income'),p=sum(a,'payment');return `<div class="stats"><div class="stat"><span>تعداد روزهای ثبت‌شده</span><b>${fa(new Set(a.map(x=>x.date)).size)}</b></div><div class="stat"><span>ساعت کار</span><b>${fa(sum(a,'hours'))}</b></div><div class="stat"><span>درآمد</span><b>${money(i)}</b></div><div class="stat"><span>دریافتی</span><b>${money(p)}</b></div></div><hr><div class="muted">مانده</div><div class="balance ${i-p>=0?'positive':'negative'}">${money(i-p)}</div>`}
 function report(type){let a=period(type);$('reportBox').innerHTML=`<div class="sectiontitle">گزارش ${type==='day'?'امروز':type==='week'?'این هفته':type==='month'?'این ماه':'امسال'}</div>${box(a)}<div class="actions no-print"><button onclick="exportPdf('month')">ذخیره گزارش به PDF</button></div>`}
 function renderHome(){let a=period('day'),m=period('month'),all=db,i=sum(all,'income')-sum(all,'payment'),days=new Set(m.map(x=>x.date)).size,hours=sum(m,'hours'),income=sum(m,'income'),payment=sum(m,'payment');$('dashboardKpis').innerHTML=`<div class="home-kpi"><span>درآمد این ماه</span><b>${money(income)}</b></div><div class="home-kpi"><span>دریافتی این ماه</span><b>${money(payment)}</b></div><div class="home-kpi"><span>روزهای کاری</span><b>${fa(days)}</b></div><div class="home-kpi"><span>ساعت کار</span><b>${fa(hours)} ساعت</b></div>`;$('todayStats').innerHTML=box(a);$('monthStats').innerHTML=box(m);$('totalBalance').textContent=money(i);$('totalBalance').className='balance '+(i>=0?'positive':'negative');document.title=settings.name||'دفتر کار من';$('appTitle').textContent=settings.name||'دفتر کار من'}
-function exportData(){let payload={version:3,exportedAt:new Date().toISOString(),entries:db,settings};let blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='دفتر-کار-پشتیبان.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
-function importData(){let i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=()=>{let f=i.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x.entries))throw 0;db=x.entries;settings=x.settings||{};save();localStorage.setItem(S,JSON.stringify(settings));applyTheme();renderAll();alert('اطلاعات بازیابی شد')}catch(e){alert('فایل پشتیبان معتبر نیست')}};r.readAsText(f)};i.click()}
-function buildBackupPayload(){return JSON.stringify({version:3,exportedAt:new Date().toISOString(),entries:db,settings})}
+function buildFullBackupPayload(){
+  let workspaceEntries={};
+  settings.workspaces.forEach(w=>{workspaceEntries[w.id]=loadDb(w.id)});
+  workspaceEntries[settings.activeWorkspace]=db;
+  return {version:4,exportedAt:new Date().toISOString(),settings,workspaceEntries};
+}
+function applyBackupPayload(x){
+  if(x.workspaceEntries&&typeof x.workspaceEntries==='object'){
+    if(x.settings&&typeof x.settings==='object')settings=x.settings;
+    if(!Array.isArray(settings.workspaces)||!settings.workspaces.length){
+      settings.workspaces=Object.keys(x.workspaceEntries).map(id=>({id,name:id}));
+    }
+    Object.keys(x.workspaceEntries).forEach(id=>{localStorage.setItem(wsKey(id),JSON.stringify(x.workspaceEntries[id]||[]))});
+    if(!settings.activeWorkspace||!settings.workspaces.some(w=>w.id===settings.activeWorkspace)){
+      settings.activeWorkspace=settings.workspaces[0].id;
+    }
+  }else if(Array.isArray(x.entries)){
+    localStorage.setItem(wsKey(settings.activeWorkspace),JSON.stringify(x.entries));
+    if(x.settings&&typeof x.settings==='object'){settings.name=x.settings.name||settings.name;settings.theme=x.settings.theme||settings.theme}
+  }else{throw 0}
+  localStorage.setItem(S,JSON.stringify(settings));
+  db=loadDb(settings.activeWorkspace);
+}
+function exportData(){let payload=buildFullBackupPayload();let blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='دفتر-کار-پشتیبان.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
+function importData(){let i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=()=>{let f=i.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);applyBackupPayload(x);applyTheme();renderAll();renderWorkspaceUI();alert('اطلاعات بازیابی شد')}catch(e){alert('فایل پشتیبان معتبر نیست')}};r.readAsText(f)};i.click()}
+function buildBackupPayload(){return JSON.stringify(buildFullBackupPayload())}
 function showBackupText(){let ta=$('backupTextArea');ta.value=buildBackupPayload();ta.focus();ta.select()}
 function copyBackupText(){let ta=$('backupTextArea');if(!ta.value.trim())ta.value=buildBackupPayload();ta.focus();ta.select();try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ta.value).then(()=>alert('متن پشتیبان کپی شد.')).catch(()=>{document.execCommand('copy');alert('متن پشتیبان کپی شد.')})}else{document.execCommand('copy');alert('متن پشتیبان کپی شد.')}}catch(e){alert('کپی خودکار انجام نشد؛ متن انتخاب شده است، خودت با نگه‌داشتن انگشت روی متن آن را کپی کن.')}}
-function restoreFromText(){let raw=($('backupTextArea').value||'').trim();if(!raw){alert('اول متن پشتیبان را در کادر پیست کن.');return}try{let x=JSON.parse(raw);if(!Array.isArray(x.entries))throw 0;if(!confirm('اطلاعات فعلی برنامه با این متن پشتیبان جایگزین شود؟')){return}db=x.entries;settings=x.settings||{};save();localStorage.setItem(S,JSON.stringify(settings));applyTheme();renderAll();alert('اطلاعات از روی متن بازیابی شد')}catch(e){alert('متن واردشده یک پشتیبان معتبر نیست.')}}
+function restoreFromText(){let raw=($('backupTextArea').value||'').trim();if(!raw){alert('اول متن پشتیبان را در کادر پیست کن.');return}try{let x=JSON.parse(raw);if(!(Array.isArray(x.entries)||(x.workspaceEntries&&typeof x.workspaceEntries==='object')))throw 0;if(!confirm('اطلاعات فعلی برنامه (همه کارفرماها) با این متن پشتیبان جایگزین شود؟')){return}applyBackupPayload(x);applyTheme();renderAll();renderWorkspaceUI();alert('اطلاعات از روی متن بازیابی شد')}catch(e){alert('متن واردشده یک پشتیبان معتبر نیست.')}}
 function exportPdf(type='all'){let a=type==='all'?[...db]:period(type),nowJ=isoToJ(today()),rows=a.slice().sort((x,y)=>x.date.localeCompare(y.date)).map(x=>`<tr><td>${fmt(x.date)}</td><td>${escapeHtml(x.place||'')}</td><td>${fa(x.hours)}</td><td>${money(x.income)}</td><td>${money(x.payment)}</td><td>${escapeHtml(x.note||'')}</td></tr>`).join('');let w=window.open('','_blank');if(!w){alert('مرورگر اجازه باز کردن پنجره چاپ را نداده است.');return}w.document.write(`<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>پشتیبان PDF - ${escapeHtml(settings.name||'دفتر کار من')}</title><style>body{font-family:Tahoma,Arial,sans-serif;padding:24px;color:#111}h1{font-size:22px}p{color:#555}table{width:100%;border-collapse:collapse;margin-top:18px}th,td{border:1px solid #ccc;padding:8px;text-align:right;font-size:11px}th{background:#f1f5f9}.summary{margin:15px 0;padding:12px;border:1px solid #ddd;border-radius:8px}@media print{.noprint{display:none}}</style></head><body><h1>${escapeHtml(settings.name||'دفتر کار من')} — پشتیبان PDF</h1><p>تاریخ تهیه: ${nowJ}</p><div class="summary">${box(a)}</div><table><thead><tr><th>تاریخ</th><th>محل کار</th><th>ساعت</th><th>درآمد</th><th>دریافتی</th><th>یادداشت</th></tr></thead><tbody>${rows||'<tr><td colspan="6">رکوردی برای این ماه ثبت نشده است.</td></tr>'}</tbody></table><p class="noprint">از پنجره چاپ، گزینه «Save as PDF» را انتخاب کنید.</p><script>window.onload=()=>setTimeout(()=>window.print(),300)<\/script></body></html>`);w.document.close()}
 function saveSettings(){settings.name=$('appName').value.trim()||'دفتر کار من';localStorage.setItem(S,JSON.stringify(settings));applyTheme();renderAll();alert('تنظیمات ذخیره شد')}
 function setTheme(t){settings.theme=t;localStorage.setItem(S,JSON.stringify(settings));applyTheme()}
 function applyTheme(){document.body.classList.remove('theme-dark','theme-blue','theme-green','theme-auto');let t=settings.theme||'light';if(t!=='light')document.body.classList.add('theme-'+t);document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('selected'));let b=document.querySelector('.theme-'+t+'.theme-btn');if(b)b.classList.add('selected');let meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=t==='dark'?'#020617':t==='blue'?'#1e3a8a':t==='green'?'#166534':'#111827'}
-function wipe(){if(confirm('همه اطلاعات برای همیشه حذف شود؟')){localStorage.removeItem(K);db=[];renderAll()}}
-function renderAll(){renderHome();renderCalendar();renderEntries();if(!$('reports').classList.contains('hidden'))report('month')}
+function currentWorkspaceName(){let w=settings.workspaces.find(x=>x.id===settings.activeWorkspace);return w?w.name:''}
+function renderWorkspaceUI(){
+  if($('workspaceSelect'))$('workspaceSelect').innerHTML=settings.workspaces.map(w=>`<option value="${w.id}" ${w.id===settings.activeWorkspace?'selected':''}>${escapeHtml(w.name)}</option>`).join('');
+  if($('appSub'))$('appSub').textContent='کارفرما/پروژه فعال: '+(currentWorkspaceName()||'-');
+}
+function switchWorkspace(id){
+  if(!settings.workspaces.some(w=>w.id===id))return;
+  settings.activeWorkspace=id;localStorage.setItem(S,JSON.stringify(settings));
+  db=loadDb(id);edit=null;modalDate='';modalEdit=null;
+  renderAll();renderWorkspaceUI();
+}
+function addWorkspace(){
+  let name=prompt('اسم کارفرما یا پروژه جدید را وارد کن (مثلاً: علی رضایی):');
+  if(!name||!name.trim())return;
+  let id='ws'+Date.now();
+  settings.workspaces.push({id,name:name.trim()});
+  localStorage.setItem(S,JSON.stringify(settings));
+  switchWorkspace(id);
+}
+function renameWorkspace(){
+  let w=settings.workspaces.find(x=>x.id===settings.activeWorkspace);if(!w)return;
+  let name=prompt('اسم جدید برای این کارفرما/پروژه:',w.name);
+  if(!name||!name.trim())return;
+  w.name=name.trim();localStorage.setItem(S,JSON.stringify(settings));
+  renderWorkspaceUI();renderHome();
+}
+function deleteWorkspace(){
+  if(settings.workspaces.length<=1){alert('حداقل باید یک کارفرما/پروژه باقی بماند.');return}
+  let w=settings.workspaces.find(x=>x.id===settings.activeWorkspace);if(!w)return;
+  if(!confirm(`همه اطلاعات «${w.name}» برای همیشه حذف شود؟ این کار قابل بازگشت نیست.`))return;
+  localStorage.removeItem(wsKey(w.id));
+  settings.workspaces=settings.workspaces.filter(x=>x.id!==w.id);
+  settings.activeWorkspace=settings.workspaces[0].id;
+  localStorage.setItem(S,JSON.stringify(settings));
+  db=loadDb(settings.activeWorkspace);
+  renderAll();renderWorkspaceUI();
+}
+function wipe(){if(confirm('همه اطلاعات این کارفرما/پروژه برای همیشه حذف شود؟')){localStorage.removeItem(wsKey(settings.activeWorkspace));db=[];renderAll()}}
+function renderAll(){renderWorkspaceUI();renderHome();renderCalendar();renderEntries();if(!$('reports').classList.contains('hidden'))report('month')}
 
 let pickerView=currentJ();
 function openJalaliPicker(){
